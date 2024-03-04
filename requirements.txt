@@ -1,0 +1,3 @@
+bert-embedding
+mxnet
+# sudo apt install libquadmath0
