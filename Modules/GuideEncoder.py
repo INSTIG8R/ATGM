@@ -26,34 +26,10 @@ class PositionalEncoding(nn.Module):
         #  output = word_embedding + positional_embedding
         x = x + nn.Parameter(self.pe[:, :x.size(1)],requires_grad=False) #size = [batch, L, d_model]
         return self.dropout(x) # size = [batch, L, d_model]
-    
-class GuideEncoder(nn.Module):
-
-    def __init__(self,in_channels, out_channels, spatial_size, text_len) -> None:
-
-        super().__init__()
-
-        self.guide_layer = GuideEncoderLayer(in_channels,text_len)   # for skip
-        self.spatial_size = spatial_size
-        self.encoder = UnetrUpBlock(2,in_channels,out_channels,3,2,norm_name='BATCH')
-
-    
-    def forward(self, vis, skip_vis, txt):
-
-        if txt is not None:
-            vis =  self.guide_layer(vis, txt)
-
-        vis = rearrange(vis,'B (H W) C -> B C H W',H=self.spatial_size,W=self.spatial_size)
-        skip_vis = rearrange(skip_vis,'B (H W) C -> B C H W',H=self.spatial_size*2,W=self.spatial_size*2)
-
-        output = self.encoder(vis,skip_vis)
-        output = rearrange(output,'B C H W -> B (H W) C')
-
-        return output
 
 class GuideEncoderLayer(nn.Module):
 
-    def __init__(self, in_channels:int, output_text_len:int, input_text_len:int=24, embed_dim:int=768):
+    def __init__(self, in_channels:int, output_text_len:int, input_text_len:int=10, embed_dim:int=768):
 
         super(GuideEncoderLayer, self).__init__()
 
@@ -62,8 +38,11 @@ class GuideEncoderLayer(nn.Module):
         self.self_attn_norm = nn.LayerNorm(in_channels)
         self.cross_attn_norm = nn.LayerNorm(in_channels)
 
-        self.self_attn = nn.MultiheadAttention(embed_dim=in_channels,num_heads=1,batch_first=True)
-        self.cross_attn = nn.MultiheadAttention(embed_dim=in_channels,num_heads=4,batch_first=True)
+        # self.self_attn = nn.MultiheadAttention(embed_dim=in_channels,num_heads=1,batch_first=True)
+        self.self_attn = nn.MultiheadAttention(embed_dim=in_channels,num_heads=1)
+
+        # self.cross_attn = nn.MultiheadAttention(embed_dim=in_channels,num_heads=4,batch_first=True)
+        self.cross_attn = nn.MultiheadAttention(embed_dim=in_channels,num_heads=4)
 
         self.text_project = nn.Sequential(
             nn.Conv1d(input_text_len,output_text_len,kernel_size=1,stride=1),
@@ -105,6 +84,38 @@ class GuideEncoderLayer(nn.Module):
         vis = vis + self.scale*vis2
 
         return vis
+    
+class GuideEncoder(nn.Module):
+
+    def __init__(self,in_channels, text_len) -> None:
+
+        super().__init__()
+
+        self.guide_layer = GuideEncoderLayer(in_channels,text_len)   # for skip
+        # self.spatial_size = spatial_size
+        # self.encoder = UnetrUpBlock(2,in_channels,out_channels,3,2,norm_name='BATCH')
+
+    
+    def forward(self, vis, txt):
+
+        if txt is not None:
+            vis =  self.guide_layer(vis, txt)
+
+        # vis = rearrange(vis,'B (H W) C -> B C H W',H=self.spatial_size,W=self.spatial_size)
+        # skip_vis = rearrange(skip_vis,'B (H W) C -> B C H W',H=self.spatial_size*2,W=self.spatial_size*2)
+
+        # output = self.encoder(vis,skip_vis)
+        # output = rearrange(output,'B C H W -> B (H W) C')
+
+        return vis
+    
+# if __name__ == '__main__':
+#     guide_encoder = GuideEncoder(96,3136)
+
+#     vis = torch.rand(2,3136,96)
+#     txt = torch.rand(2,10,768)
+
+#     vis =  guide_encoder(vis, txt)
 
 
 
