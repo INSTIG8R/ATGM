@@ -244,12 +244,12 @@ class SwinTransformerBlock(nn.Module):
         return f"dim={self.dim}, input_resolution={self.input_resolution}, num_heads={self.num_heads}, " \
                f"window_size={self.window_size}, shift_size={self.shift_size}, mlp_ratio={self.mlp_ratio}"
     
-if __name__ == "__main__":
-    swin = SwinTransformerBlock(dim=96, input_resolution=(56,56), num_heads=3)
-    parameters = sum(p.numel() for p in swin.parameters() if p.requires_grad)
+# if __name__ == "__main__":
+#     swin = SwinTransformerBlock(dim=96, input_resolution=(56,56), num_heads=3)
+#     parameters = sum(p.numel() for p in swin.parameters() if p.requires_grad)
     
-    x = torch.rand(2,3136,96)
-    for i in range(2):
-        block_out = swin(x)
+#     x = torch.rand(2,3136,96)
+#     for i in range(2):
+#         block_out = swin(x)
 
-    print(block_out.shape) #2,3136,96
+#     print(block_out.shape) #2,3136,96
