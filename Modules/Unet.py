@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from matplotlib import pyplot as plt
 from torchinfo import summary
+import torchvision
 
 # from BERT import BERT
 from Modules.PatchEmbed import PatchEmbed
@@ -46,7 +47,27 @@ class Unet(nn.Module):
         x_dec3 = self.Decoder3(x_dec2,skip_0)
         x_out = self.FinalOutput(x_dec3)
 
+        # x = x_out.transpose(1,3)
+        trans = torchvision.transforms.ToPILImage()
+        out = trans(x_out[0])
+        out.show()
+
         return x_out
+
+        
+
+        # output = x
+
+        # output = output.transpose(1,3)
+        # print(output.shape)
+
+
+        # plt.imshow(output[0,0].cpu().detach().numpy())
+        # plt.show()
+
+        # output = output.transpose(1,3)
+
+        
 
 
 

@@ -4,7 +4,6 @@ from einops import rearrange, repeat
 import math
 import torch.nn.functional as F
 
-
 class PositionalEncoding(nn.Module):
 
     def __init__(self, d_model:int, dropout=0, max_len:int=5000) -> None:

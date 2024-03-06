@@ -17,11 +17,11 @@ class Bottleneck(nn.Module):
             for i in range(depth):
                 x = self.swin(x)
         if conv:
-            if x.shape[1]!=self.in_channels:
-                x = x.transpose(2,1)
+            # if x.shape[1]!=self.in_channels:
+            #     x = x.transpose(2,1)
             x = self.conv(x,maxpool=False)
-            if x.shape[1]==self.in_channels:
-                x = x.transpose(2,1)
+            # if x.shape[1]==self.in_channels:
+            #     x = x.transpose(2,1)
 
         return x
 

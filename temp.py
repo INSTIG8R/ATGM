@@ -1,41 +1,39 @@
 import torch
 import torch.nn as nn
-import math
+# from Modules.Unet import Unet
+from matplotlib import pyplot as plt
+from torchinfo import summary
+import torchvision
 
-x = torch.rand(2,96,3136)
+conv_test = nn.Conv2d(in_channels=96, out_channels=192, kernel_size=3, padding=1)
+x= torch.rand(2,96,56,56)
 
-channel_conv = nn.Conv1d(in_channels=96,out_channels=3,kernel_size=1)
+x = conv_test(x)
+print(x.shape)
 
-x_up = channel_conv(x)
+# x = torch.rand(2,3,224,224)
+# text = torch.rand(2,10,768)
+# x, text = x.cuda(),text.cuda()
 
-print(x_up.shape)
+# unet = Unet(num_classes=1).cuda()
+# output = unet(x,text)
+# x = output.transpose(1,3)
+# trans = torchvision.transforms.ToPILImage()
+# out = trans(x[0])
+# out.show()
 
-x.view
+# summary(unet, [(2,3,224,224),(2,10,768)])
 
-channel_conv = nn.ConvTranspose1d(in_channels=3,out_channels=3,kernel_size=4,stride=4)
-
-x_up = channel_conv(x_up)
-
-print(x_up.shape)
-
-channel_conv = nn.ConvTranspose1d(in_channels=3,out_channels=3,kernel_size=4,stride=4)
-
-x_up = channel_conv(x_up)
-
-print(x_up.shape)
-
-x_up = x_up.transpose(2,1)
-
-h = int(math.sqrt(x_up.shape[1]))
-
-x_up = x_up.view(x_up.shape[0],h,h,x_up.shape[2])
-
-print(x_up.shape)
+# x = torch.randn(1, 1, 224, 224)
+# trans = torchvision.transforms.ToPILImage()
+# out = trans(x[0])
+# out.show()
 
 
-# x_down = maxpool(x_added)
-# print(x_down.shape)
-# x_added_2 = channel_conv(x_added)
+# print(output.shape)
+# output = output.transpose(1,3)
+# print(output.shape)
 
+# plt.imshow(output[0,0].cpu().detach().numpy())
 
-# print(x_added_2.shape)
+# plt.show()
