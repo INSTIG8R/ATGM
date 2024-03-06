@@ -571,3 +571,13 @@ def get_session_name():
     formatted_string = current_datetime.strftime("%-m_%-d_%y_%H%M")
 
     return formatted_string
+
+def read_text(filename):
+    df = pd.read_csv(filename)
+    text = {}
+    for i in df.index.values:  # Gets the index of the row number and traverses it
+        count = len(df.Description[i].split())
+        if count < 9:
+            df.Description[i] = df.Description[i] + ' EOF XXX' * (9 - count)
+        text[df.Image[i]] = df.Description[i]
+    return text  # return dict (key: values)

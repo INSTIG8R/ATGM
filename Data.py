@@ -103,14 +103,13 @@ class ATGMDataset(Dataset):
         self.image_size = image_size
         self.input_path = os.path.join(dataset_path, 'img')
         self.output_path = os.path.join(dataset_path, 'labelcol')
+        images_list = os.listdir(self.input_path)
         if config.set_dataloader_size==0:
-            self.images_list = os.listdir(self.input_path)
-            self.mask_list = os.listdir(self.output_path)
+            self.images_list = images_list
         else:
             # making the dataset smaller so that the dataloader has set_dataloader_size number of batches
-            rand_idx = random.sample(range(len(self.images_list)), config.set_dataloader_size * config.batch_size)
-            self.images_list = os.listdir(self.input_path)[rand_idx]
-            self.mask_list = os.listdir(self.output_path)[rand_idx]
+            rand_idx = random.sample(range(len(images_list)), config.set_dataloader_size * config.batch_size)
+            self.images_list = [images_list[x] for x in rand_idx]
 
         self.one_hot_mask = one_hot_mask
         self.rowtext = row_text
@@ -127,10 +126,8 @@ class ATGMDataset(Dataset):
         return len(os.listdir(self.input_path))
 
     def __getitem__(self, idx):
-
         image_filename = self.images_list[idx]  # MoNuSeg
         mask_filename = image_filename[: -3] + "png"  # MoNuSeg
-        # mask_filename = self.mask_list[idx]  # Covid19
         # image_filename = mask_filename.replace('mask_', '')  # Covid19
         image = cv2.imread(os.path.join(self.input_path, image_filename))
         image = cv2.resize(image, (self.image_size, self.image_size))
