@@ -14,7 +14,7 @@ import logging
 import warnings
 import Config as config
 from torchvision import transforms
-from utils import CosineAnnealingWarmRestarts, WeightedDiceBCE, save_on_batch, iou_on_batch, DiceLoss
+from utils import CosineAnnealingWarmRestarts, WeightedDiceBCE, save_on_batch, iou_on_batch, DiceLoss, get_session_name, save_two_predictions_and_masks_randomly
 from thop import profile
 import pandas as pd 
 
@@ -145,20 +145,29 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
 
     max_dice = 0.0
     best_epoch = 1
+    session_name = get_session_name()
+    if not os.path.exists('./training_output'):
+        os.mkdir('./training_output')
+    img_save_path = './training_output/' + session_name
+    img_save_path_train = img_save_path + '/train'
+    img_save_path_val = img_save_path + '/val'
+    os.mkdir(img_save_path)
+    os.mkdir(img_save_path_train)
+    os.mkdir(img_save_path_val)
     for epoch in range(config.epochs):  # loop over the dataset multiple times
         logger.info('\n========= Epoch [{}/{}] ========='.format(epoch + 1, config.epochs + 1))
         logger.info(config.session_name)
         # train for one epoch
         model.train(True)
         logger.info('Training with batch size : {}'.format(batch_size))
-        train_one_epoch(train_loader, model, criterion, optimizer, writer, epoch, None, model_type, logger)  # sup
+        train_one_epoch(train_loader, model, criterion, optimizer, writer, epoch, None, model_type, logger, img_save_path_train)  # sup
 
         # evaluate on validation set
         logger.info('Validation')
         with torch.no_grad():
             model.eval()
             val_loss, val_dice = train_one_epoch(val_loader, model, criterion,
-                                                 optimizer, writer, epoch, lr_scheduler, model_type, logger)
+                                                 optimizer, writer, epoch, lr_scheduler, model_type, logger, img_save_path_val)
         #### Save best model
         if val_dice > max_dice:
             if epoch + 1 > 5:
@@ -177,6 +186,7 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
                         'the best is still: {:.4f} in epoch {}'.format(val_dice, max_dice, best_epoch))
         early_stopping_count = epoch - best_epoch + 1
         logger.info('\t early_stopping_count: {}/{}'.format(early_stopping_count, config.early_stopping_patience))
+                
 
         if early_stopping_count > config.early_stopping_patience:
             logger.info('\t early_stopping!')
@@ -233,7 +243,7 @@ def print_summary(epoch, i, nb_batch, loss, loss_name, batch_time,
     # print summary
 
 
-def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_scheduler, model_type, logger):
+def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_scheduler, model_type, logger, img_save_path):
     logging_mode = 'Train' if model.training else 'Val'
     end = time.time()
     time_sum, loss_sum = 0, 0
@@ -274,7 +284,8 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
             vis_path = config.visualize_path+str(epoch)+'/'
             if not os.path.isdir(vis_path):
                 os.makedirs(vis_path)
-            save_on_batch(images,masks,preds,names,vis_path)
+            # save_on_batch(images,masks,preds,names,vis_path) 
+            save_two_predictions_and_masks_randomly(masks,preds,names,img_save_path)
         dices.append(train_dice)
 
         time_sum += len(images) * batch_time
@@ -315,7 +326,7 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
             writer.add_scalar(logging_mode + '_dice', train_dice, step)
 
         torch.cuda.empty_cache()
-
+        
     if lr_scheduler is not None:
         lr_scheduler.step()
 

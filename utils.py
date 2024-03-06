@@ -11,6 +11,8 @@ import warnings
 import weakref
 from PIL import Image
 from numpy import average, dot, linalg
+from datetime import datetime
+import random
 
 from torch.optim.optimizer import Optimizer
 
@@ -271,6 +273,21 @@ def save_on_batch(images1, masks, pred, names, vis_path):
 
         cv2.imwrite(vis_path + names[i][:-4] + "_pred.jpg", pred_tmp)
         cv2.imwrite(vis_path + names[i][:-4] + "_gt.jpg", mask_tmp)
+
+
+def save_two_predictions_and_masks_randomly(masks, pred, names, img_save_path):
+    '''randomly saves two prediction + gt at location img_save_path'''
+    rand_idx = random.sample(range(len(pred)), 2)
+    for i in rand_idx:
+        pred_tmp = pred[i][0].cpu().detach().numpy()
+        mask_tmp = masks[i].cpu().detach().numpy()
+        pred_tmp[pred_tmp >= 0.5] = 255
+        pred_tmp[pred_tmp < 0.5] = 0
+        mask_tmp[mask_tmp > 0] = 255
+        mask_tmp[mask_tmp <= 0] = 0
+
+        cv2.imwrite(img_save_path + names[i][:-4] + "_pred.jpg", pred_tmp)
+        cv2.imwrite(img_save_path + names[i][:-4] + "_gt.jpg", mask_tmp)
 
 
 class _LRScheduler(object):
@@ -548,3 +565,9 @@ def img_similarity_vectors_via_numpy(image1, image2):
     a_norm, b_norm = norms
     res = dot(a / a_norm, b / b_norm)
     return res
+
+def get_session_name():
+    current_datetime = datetime.now()
+    formatted_string = current_datetime.strftime("%-m_%-d_%y_%H%M")
+
+    return formatted_string
