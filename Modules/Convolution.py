@@ -5,6 +5,7 @@ class Convolution(nn.Module):
     def __init__(self,in_channels,out_channels):
         super().__init__()
         self.in_channels = in_channels
+        self.out_channels = out_channels
         self.conv = nn.Sequential(
             nn.Conv1d(in_channels, out_channels, kernel_size=3, padding=1),
             nn.BatchNorm1d(out_channels),
@@ -22,7 +23,8 @@ class Convolution(nn.Module):
         if maxpool==True:
             x_conv = self.maxpool(x_conv)
 
-        x_conv = x_conv.transpose(1,2)
+        if x_conv.shape[1]==self.out_channels:
+            x_conv = x_conv.transpose(2,1)
 
         return x_conv
     
