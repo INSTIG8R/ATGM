@@ -14,7 +14,7 @@ import logging
 import warnings
 import Config as config
 from torchvision import transforms
-from utils import CosineAnnealingWarmRestarts, WeightedDiceBCE, save_on_batch, iou_on_batch, DiceLoss, get_session_name, save_two_predictions_and_masks_randomly
+from utils import CosineAnnealingWarmRestarts, WeightedDiceBCE, save_on_batch, iou_on_batch, DiceLoss, get_session_name, save_two_predictions_and_masks_randomly, read_text
 from thop import profile
 import pandas as pd 
 
@@ -190,10 +190,8 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
     train_tf = transforms.Compose([RandomGenerator(output_size=[config.img_size, config.img_size])])
     val_tf = ValGenerator(output_size=[config.img_size, config.img_size])
 
-    train_text = read_csv(config.train_dataset + 'generated_text.csv')
-    # train_text = dict(zip(train_df['image'], train_df['generated_caption']))
-    val_text = read_csv(config.val_dataset + 'generated_text.csv')
-    # val_text = dict(zip(val_df['image'], val_df['generated_caption']))
+    train_text = read_text(config.train_dataset + 'generated_text.csv')
+    val_text = read_text(config.val_dataset + 'generated_text.csv')
     train_dataset = ATGMDataset(config.train_dataset, config.task_name, train_text, train_tf,
                                     image_size=config.img_size)
     val_dataset = ATGMDataset(config.val_dataset, config.task_name, val_text, val_tf, image_size=config.img_size)
