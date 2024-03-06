@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 
-from SwinTransformer import SwinTransformerBlock
-from Convolution import Convolution
+from Modules.SwinTransformer import SwinTransformerBlock
+from Modules.Convolution import Convolution
 
 class Bottleneck(nn.Module):
     def __init__(self, in_channels, out_channels, input_resolution, num_heads):

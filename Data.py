@@ -101,13 +101,14 @@ class ATGMDataset(Dataset):
                  image_size: int = 224) -> None:
         self.dataset_path = dataset_path
         self.image_size = image_size
-        self.input_path = os.path.join(dataset_path, 'img')
-        self.output_path = os.path.join(dataset_path, 'labelcol')
+        self.input_path = os.path.join(dataset_path, 'Image')
+        self.output_path = os.path.join(dataset_path, 'GT')
         if config.set_dataloader_size==0:
             self.images_list = os.listdir(self.input_path)
             self.mask_list = os.listdir(self.output_path)
         else:
             # making the dataset smaller so that the dataloader has set_dataloader_size number of batches
+            self.images_list = os.listdir(self.input_path)
             rand_idx = random.sample(range(len(self.images_list)), config.set_dataloader_size * config.batch_size)
             self.images_list = os.listdir(self.input_path)[rand_idx]
             self.mask_list = os.listdir(self.output_path)[rand_idx]

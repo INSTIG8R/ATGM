@@ -82,11 +82,11 @@ if __name__ == '__main__':
 
     if model_type == 'ATGM':
         config_vit = config.get_ATGM_config()
-        model = Unet(config_vit, n_channels=config.n_channels, n_classes=config.n_labels)
+        model = Unet(config_vit, n_channels=config.n_channels, num_classes=config.n_labels)
 
     elif model_type == 'ATGM_pretrain':
         config_vit = config.get_ATGM_config()
-        model = Unet(config_vit, n_channels=config.n_channels, n_classes=config.n_labels)
+        model = Unet(config_vit, n_channels=config.n_channels, num_classes=config.n_labels)
 
 
     else:

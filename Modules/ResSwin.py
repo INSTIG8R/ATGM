@@ -1,9 +1,9 @@
 import torch
 import torch.nn as nn
 
-from SwinTransformer import SwinTransformerBlock
-from PatchMerging import PatchMerging
-from Convolution import Convolution
+from Modules.SwinTransformer import SwinTransformerBlock
+from Modules.PatchMerging import PatchMerging
+from Modules.Convolution import Convolution
 
 class ResSwin(nn.Module):
     def __init__(self,input_dim,output_dim,input_resolution,num_heads,depth):

@@ -1,16 +1,16 @@
 import torch
 import torch.nn as nn
 from matplotlib import pyplot as plt
-
-from BERT import BERT
-from PatchEmbed import PatchEmbed
-from GuideEncoder import GuideEncoder
-from ResSwin import ResSwin
-from Bottleneck import Bottleneck
-from AttentionGate import AttentionGate
-from Deconvolution import Deconvolution
-from FinalOutput import FinalOutput
 from torchinfo import summary
+
+# from BERT import BERT
+from Modules.PatchEmbed import PatchEmbed
+from Modules.GuideEncoder import GuideEncoder
+from Modules.ResSwin import ResSwin
+from Modules.Bottleneck import Bottleneck
+from Modules.AttentionGate import AttentionGate
+from Modules.Deconvolution import Deconvolution
+from Modules.FinalOutput import FinalOutput
 
 class Unet(nn.Module):
     def __init__(self,num_classes):
@@ -19,8 +19,8 @@ class Unet(nn.Module):
         self.PatchEmbed = PatchEmbed()
         self.GuideEncoder = GuideEncoder(in_channels=96, text_len=3136)
         self.ResSwin1 = ResSwin(input_dim=96,output_dim=192,input_resolution=(56,56),num_heads=3,depth=2)
-        self.ResSwin2 = ResSwin(input_dim=192,output_dim=384,input_resolution=(28,28),num_heads=6,depth=2)
-        self.ResSwin3 = ResSwin(input_dim=384,output_dim=768,input_resolution=(14,14),num_heads=12,depth=2)
+        self.ResSwin2 = ResSwin(input_dim=192,output_dim=384,input_resolution=(28,28),num_heads=6,depth=6)
+        self.ResSwin3 = ResSwin(input_dim=384,output_dim=768,input_resolution=(14,14),num_heads=12,depth=6)
         self.Bottleneck = Bottleneck(in_channels=768, out_channels=768, input_resolution=(7,7), num_heads=24)
         self.AttentionGate3 = AttentionGate(gate_input_channel=768,skip_input_channel=384)
         self.AttentionGate2 = AttentionGate(gate_input_channel=384,skip_input_channel=192)
@@ -44,13 +44,13 @@ class Unet(nn.Module):
         print(x_res3.shape)
         x_bottle = self.Bottleneck(x_res3)
         print(x_bottle.shape)
-        skip_2 = x_res2
-        skip_1 = x_res1
-        skip_0 = x_embed
+        skip_2 = self.AttentionGate3(x_bottle,x_res2)
         x_dec1 = self.Decoder1(x_res3,skip_2)
         print(x_dec1.shape)
+        skip_1 = self.AttentionGate2(x_dec1,x_res1)
         x_dec2 = self.Decoder2(x_dec1,skip_1)
         print(x_dec2.shape)
+        skip_0 = self.AttentionGate1(x_dec2,x_embed)       
         x_dec3 = self.Decoder3(x_dec2,skip_0)
         print(x_dec3.shape)
         x_out = self.FinalOutput(x_dec3)

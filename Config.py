@@ -27,7 +27,7 @@ save_frequency = 5000
 vis_frequency = 10  # saves masks and predictions every 10 epochs
 early_stopping_patience = 50
 # set_dataloader_size = 0   # 0 means max size
-set_dataloader_size = 10
+set_dataloader_size = 0
 
 pretrain = False
 task_name = 'MoNuSeg' 
@@ -38,10 +38,10 @@ batch_size = 2  # For LViT-T, 2 is better than 4
 model_name = 'ATGM'
 # model_name = 'ATGM_pretrain'
 
-train_dataset = './datasets/' + task_name + '/Train_Folder/'
-val_dataset = './datasets/' + task_name + '/Val_Folder/'
-test_dataset = './datasets/' + task_name + '/Test_Folder/'
-task_dataset = './datasets/' + task_name + '/Train_Folder/'
+train_dataset = './Dataset/' + task_name + '/Train/'
+val_dataset = './Dataset/' + task_name + '/Validate/'
+test_dataset = './Dataset/' + task_name + '/Test/'
+task_dataset = './Dataset/' + task_name + '/Train_Folder/'
 session_name = 'Test_session' + '_' + time.strftime('%m.%d_%Hh%M')
 save_path = task_name + '/' + model_name + '/' + session_name + '/'
 model_path = save_path + 'models/'
@@ -63,7 +63,7 @@ def get_ATGM_config():
     config.transformer.dropout_rate = 0
     config.patch_sizes = [16, 8, 4, 2]
     config.base_channel = 64  # base channel of U-Net
-    config.n_classes = 1
+    config.num_classes = 1
     return config
 
 

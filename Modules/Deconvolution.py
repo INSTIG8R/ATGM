@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from Convolution import Convolution
+from Modules.Convolution import Convolution
 
 class Deconvolution(nn.Module):
     def __init__(self,input_channel,skip_input_channel):

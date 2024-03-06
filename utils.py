@@ -25,8 +25,8 @@ class WeightedBCE(nn.Module):
 
     def forward(self, logit_pixel, truth_pixel):
         # print("====",logit_pixel.size())
-        logit = logit_pixel.view(-1)
-        truth = truth_pixel.view(-1)
+        logit = logit_pixel.reshape(-1)
+        truth = truth_pixel.reshape(-1)
         assert (logit.shape == truth.shape)
         loss = F.binary_cross_entropy(logit, truth, reduction='none')
         pos = (truth > 0.5).float()
@@ -45,11 +45,11 @@ class WeightedDiceLoss(nn.Module):
 
     def forward(self, logit, truth, smooth=1e-5):
         batch_size = len(logit)
-        logit = logit.view(batch_size, -1)
-        truth = truth.view(batch_size, -1)
+        logit = logit.reshape(batch_size, -1)
+        truth = truth.reshape(batch_size, -1)
         assert (logit.shape == truth.shape)
-        p = logit.view(batch_size, -1)
-        t = truth.view(batch_size, -1)
+        p = logit.reshape(batch_size, -1)
+        t = truth.reshape(batch_size, -1)
         w = truth.detach()
         w = w * (self.weights[1] - self.weights[0]) + self.weights[0]
         p = w * (p)
@@ -69,8 +69,8 @@ class BinaryDiceLoss(nn.Module):
     def forward(self, inputs, targets):
         N = targets.size()[0]
         smooth = 1
-        input_flat = inputs.view(N, -1)
-        targets_flat = targets.view(N, -1)
+        input_flat = inputs.reshape(N, -1)
+        targets_flat = targets.reshape(N, -1)
         intersection = input_flat + targets_flat
         N_dice_eff = (2 * intersection.sum(1) + smooth) / (input_flat.sum(1) + targets_flat.sum(1) + smooth)
         loss = 1 - N_dice_eff.sum() / N
@@ -97,13 +97,13 @@ class MultiClassDiceLoss(nn.Module):
 
 
 class DiceLoss(nn.Module):
-    def __init__(self, n_classes):
+    def __init__(self, num_classes):
         super(DiceLoss, self).__init__()
-        self.n_classes = n_classes
+        self.num_classes = num_classes
 
     def _one_hot_encoder(self, input_tensor):
         tensor_list = []
-        for i in range(self.n_classes):
+        for i in range(self.num_classes):
             temp_prob = input_tensor == i * torch.ones_like(input_tensor)
             tensor_list.append(temp_prob)
         output_tensor = torch.cat(tensor_list, dim=1)
@@ -124,18 +124,18 @@ class DiceLoss(nn.Module):
             inputs = torch.softmax(inputs, dim=1)
         target = self._one_hot_encoder(target)
         if weight is None:
-            weight = [1] * self.n_classes
+            weight = [1] * self.num_classes
         assert inputs.size() == target.size(), 'predict & target shape do not match'
         class_wise_dice = []
         loss = 0.0
         dice1 = self._dice_loss(inputs[:, 1], target[:, 1]) * weight[1]
         dice2 = self._dice_loss(inputs[:, 2], target[:, 2]) * weight[2]
         dice3 = self._dice_loss(inputs[:, 3], target[:, 3]) * weight[3]
-        for i in range(0, self.n_classes):
+        for i in range(0, self.num_classes):
             dice = self._dice_loss(inputs[:, i], target[:, i])
             class_wise_dice.append(1.0 - dice.item())
             loss += dice * weight[i]
-        return loss / self.n_classes, dice1, dice2, dice3
+        return loss / self.num_classes, dice1, dice2, dice3
 
 
 class WeightedDiceCE(nn.Module):

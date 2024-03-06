@@ -3,7 +3,6 @@ import torch.nn as nn
 from einops import rearrange, repeat
 import math
 import torch.nn.functional as F
-from monai.networks.blocks.unetr_block import UnetrUpBlock
 
 
 class PositionalEncoding(nn.Module):
