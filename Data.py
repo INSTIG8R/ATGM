@@ -11,9 +11,7 @@ import os
 import cv2
 from scipy import ndimage
 from bert_embedding import BertEmbedding
-import pandas as pd
-import json
-
+import Config as config
 
 def random_rot_flip(image, label):
     k = np.random.randint(0, 4)
@@ -105,8 +103,15 @@ class ATGMDataset(Dataset):
         self.image_size = image_size
         self.input_path = os.path.join(dataset_path, 'img')
         self.output_path = os.path.join(dataset_path, 'labelcol')
-        self.images_list = os.listdir(self.input_path)
-        self.mask_list = os.listdir(self.output_path)
+        if config.set_dataloader_size==0:
+            self.images_list = os.listdir(self.input_path)
+            self.mask_list = os.listdir(self.output_path)
+        else:
+            # making the dataset smaller so that the dataloader has set_dataloader_size number of batches
+            rand_idx = random.sample(range(len(self.images_list)), config.set_dataloader_size * config.batch_size)
+            self.images_list = os.listdir(self.input_path)[rand_idx]
+            self.mask_list = os.listdir(self.output_path)[rand_idx]
+
         self.one_hot_mask = one_hot_mask
         self.rowtext = row_text
         self.task_name = task_name

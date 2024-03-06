@@ -24,8 +24,10 @@ epochs = 2000
 img_size = 224
 print_frequency = 1
 save_frequency = 5000
-vis_frequency = 10
+vis_frequency = 10  # saves masks and predictions every 10 epochs
 early_stopping_patience = 50
+# set_dataloader_size = 0   # 0 means max size
+set_dataloader_size = 10
 
 pretrain = False
 task_name = 'MoNuSeg' 
