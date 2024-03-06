@@ -33,28 +33,18 @@ class Unet(nn.Module):
     def forward(self,x,text):
         text_embed = text
         x_embed = self.PatchEmbed(x)
-        print(x_embed.shape)
         x_guide = self.GuideEncoder(x_embed,text_embed)
-        print(x_guide.shape)
         x_res1 = self.ResSwin1(x_guide)
-        print(x_res1.shape)
         x_res2 = self.ResSwin2(x_res1)
-        print(x_res2.shape)
         x_res3 = self.ResSwin3(x_res2)
-        print(x_res3.shape)
         x_bottle = self.Bottleneck(x_res3)
-        print(x_bottle.shape)
         skip_2 = self.AttentionGate3(x_bottle,x_res2)
         x_dec1 = self.Decoder1(x_res3,skip_2)
-        print(x_dec1.shape)
         skip_1 = self.AttentionGate2(x_dec1,x_res1)
         x_dec2 = self.Decoder2(x_dec1,skip_1)
-        print(x_dec2.shape)
         skip_0 = self.AttentionGate1(x_dec2,x_embed)       
         x_dec3 = self.Decoder3(x_dec2,skip_0)
-        print(x_dec3.shape)
         x_out = self.FinalOutput(x_dec3)
-        print(x_out.shape)
 
         return x_out
 
