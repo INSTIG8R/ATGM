@@ -14,7 +14,7 @@ import logging
 import warnings
 import Config as config
 from torchvision import transforms
-from utils import CosineAnnealingWarmRestarts, WeightedDiceBCE, save_on_batch, iou_on_batch
+from utils import CosineAnnealingWarmRestarts, WeightedDiceBCE, save_on_batch, iou_on_batch, DiceLoss
 from thop import profile
 import pandas as pd 
 
@@ -125,7 +125,10 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
     if torch.cuda.device_count() > 1:
         print("Let's use {0} GPUs!".format(torch.cuda.device_count()))
         model = nn.DataParallel(model)
-    criterion = WeightedDiceBCE(dice_weight=0.5, BCE_weight=0.5)
+    if config.loss_func=="diceBCE":
+        criterion = WeightedDiceBCE(dice_weight=0.5, BCE_weight=0.5)
+    else:
+        criterion = DiceLoss(config.n_labels)
     optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=lr)  # Choose optimize
     if config.cosineLR is True:
         lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=1e-4)
