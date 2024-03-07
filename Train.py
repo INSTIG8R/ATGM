@@ -91,7 +91,7 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
     time_sum, loss_sum = 0, 0
     dice_sum, iou_sum, acc_sum = 0.0, 0.0, 0.0
     dices = []
-    for i, (sampled_batch, names) in enumerate(loader, 1):
+    for i, (sampled_batch, names) in enumerate(loader, 0):
 
         try:
             loss_name = criterion._get_name()
@@ -127,7 +127,7 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
             vis_path = config.visualize_path+str(epoch)+'/'
             if not os.path.isdir(vis_path):
                 os.makedirs(vis_path)
-            # save_on_batch(images,masks,preds,names,vis_path) 
+            save_on_batch(images,masks,preds,names,vis_path) 
             save_two_predictions_and_masks_randomly(masks,preds,names,img_save_path)
         dices.append(train_dice)
 
@@ -190,8 +190,8 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
     train_tf = transforms.Compose([RandomGenerator(output_size=[config.img_size, config.img_size])])
     val_tf = ValGenerator(output_size=[config.img_size, config.img_size])
 
-    train_text = read_text(config.train_dataset + 'generated_text.csv')
-    val_text = read_text(config.val_dataset + 'generated_text.csv')
+    train_text = read_csv(config.train_dataset + 'generated_text.csv')
+    val_text = read_csv(config.val_dataset + 'generated_text.csv')
     train_dataset = ATGMDataset(config.train_dataset, config.task_name, train_text, train_tf,
                                     image_size=config.img_size)
     val_dataset = ATGMDataset(config.val_dataset, config.task_name, val_text, val_tf, image_size=config.img_size)
@@ -311,9 +311,9 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
         logger.info('\t early_stopping_count: {}/{}'.format(early_stopping_count, config.early_stopping_patience))
                 
 
-        if early_stopping_count > config.early_stopping_patience:
-            logger.info('\t early_stopping!')
-            break
+        # if early_stopping_count > config.early_stopping_patience:
+        #     logger.info('\t early_stopping!')
+        #     break
 
     return model
 

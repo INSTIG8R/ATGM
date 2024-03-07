@@ -101,8 +101,8 @@ class ATGMDataset(Dataset):
                  image_size: int = 224) -> None:
         self.dataset_path = dataset_path
         self.image_size = image_size
-        self.input_path = os.path.join(dataset_path, 'img')
-        self.output_path = os.path.join(dataset_path, 'labelcol')
+        self.input_path = os.path.join(dataset_path, 'Image')
+        self.output_path = os.path.join(dataset_path, 'GT')
         images_list = os.listdir(self.input_path)
         if config.set_dataloader_size==0:
             self.images_list = images_list
@@ -127,8 +127,9 @@ class ATGMDataset(Dataset):
 
     def __getitem__(self, idx):
         image_filename = self.images_list[idx]  # MoNuSeg
-        mask_filename = image_filename[: -3] + "png"  # MoNuSeg
-        # image_filename = mask_filename.replace('mask_', '')  # Covid19
+        # mask_filename = image_filename[: -3] + "png"  # MoNuSeg
+        # mask_filename = mask_filename.replace('mask_', '')  # Covid19
+        mask_filename = 'mask_' + image_filename
         image = cv2.imread(os.path.join(self.input_path, image_filename))
         image = cv2.resize(image, (self.image_size, self.image_size))
 
