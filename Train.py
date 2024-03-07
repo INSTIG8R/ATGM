@@ -91,7 +91,7 @@ def train_one_epoch(loader, model, criterion, optimizer, writer, epoch, lr_sched
     time_sum, loss_sum = 0, 0
     dice_sum, iou_sum, acc_sum = 0.0, 0.0, 0.0
     dices = []
-    for i, (sampled_batch, names) in enumerate(loader, 0):
+    for i, (sampled_batch, names) in enumerate(loader, 1):
 
         try:
             loss_name = criterion._get_name()
@@ -226,8 +226,8 @@ def main_loop(batch_size=config.batch_size, model_type='', tensorboard=True):
         logger.info('transformer head num: {}'.format(config_vit.transformer.num_heads))
         logger.info('transformer layers num: {}'.format(config_vit.transformer.num_layers))
         logger.info('transformer expand ratio: {}'.format(config_vit.expand_ratio))
-        model = Unet(config_vit, n_channels=config.n_channels, num_classes=config.n_labels)
-        pretrained_atgm_model_path = "./path/to/models/best_model-ATGM.pth.tar"
+        model = Unet(num_classes=config.n_labels)
+        pretrained_atgm_model_path = "Covid19/ATGM_pretrain/Test_session_03.07_10h44/models/best_model-ATGM_pretrain.pth.tar"
         pretrained_atgm = torch.load(pretrained_atgm_model_path, map_location='cuda')
         pretrained_atgm = pretrained_atgm['state_dict']
         model2_dict = model.state_dict()
